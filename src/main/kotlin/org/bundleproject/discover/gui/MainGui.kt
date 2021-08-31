@@ -1,5 +1,6 @@
 package org.bundleproject.discover.gui
 
+import dev.isxander.xanderlib.utils.Multithreading
 import org.bundleproject.discover.Discover
 import org.bundleproject.discover.repo.entry.EntryAction
 import org.bundleproject.discover.repo.entry.EntryWarning
@@ -34,11 +35,52 @@ class MainGui(private val discover: Discover) {
             ImageIcon(getScaledImage(discover.repositoryManager.getImage(mod.iconFile), 50, 50, mod.iconScaling))
     }
 
-    private abstract class GuiCheckBox(text: String?) : JCheckBox(text) {
+    fun openGuide(rawText: String?) {
+        val guide = JFrame("Guide")
+        guide.defaultCloseOperation = WindowConstants.DISPOSE_ON_CLOSE
+        guide.iconImage = getResourceImage("/skyclient.png")
+        guide.isResizable = false
+        val pane = JPanel()
+        val gridBag = GridBagLayout()
+        val constraints = GridBagConstraints()
+        guide.layout = gridBag
+        pane.layout = gridBag
+        constraints.fill = GridBagConstraints.HORIZONTAL
+        val parser = Parser.builder().build()
+        val document = parser.parse(rawText)
+        val renderer = HtmlRenderer.builder().build()
+        val html = renderer.render(document)
+        val editorPane = JEditorPane()
+        val kit = HTMLEditorKit()
+        val style = StyleSheet()
+        style.importStyleSheet(MainGui::class.java.getResource("/md-style.css"))
+        kit.styleSheet = style
+        editorPane.editorKit = kit
+        editorPane.contentType = "text/html"
+        editorPane.isEditable = false
+        editorPane.text = html
+        pane.add(editorPane)
+        val sp = JScrollPane(
+            pane,
+            ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+            ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED
+        )
+        sp.verticalScrollBar.unitIncrement = 16
+        sp.preferredSize = Dimension(800, 600)
+        constraints.gridwidth = 0
+        constraints.gridy = constraints.gridwidth
+        constraints.gridx = constraints.gridy
+        gridBag.setConstraints(sp, constraints)
+        guide.add(sp)
+        guide.pack()
+        guide.isVisible = true
+    }
+
+    abstract class GuiCheckBox(text: String?) : JCheckBox(text) {
         abstract fun onPress()
     }
 
-    private class GuiEntry(val imageLabel: JLabel, val checkbox: GuiCheckBox)
+    class GuiEntry(val imageLabel: JLabel, val checkbox: GuiCheckBox)
     companion object {
         fun warnDanger(warning: EntryWarning?): Boolean {
             if (warning == null) return true
@@ -52,74 +94,15 @@ class MainGui(private val discover: Discover) {
             return option == JOptionPane.YES_OPTION
         }
 
-        fun warnExtraMods(modIds: Array<String?>): Boolean {
-            if (modIds.isEmpty()) return true
-            val warnLines: MutableList<String> = ArrayList()
-            warnLines.add("This mod requires other dependencies to work.")
-            warnLines.add("Do you want to add these mods?")
-            warnLines.add("")
-            modIds.asIterable().forEach {
-                if (it != null) {
-                    warnLines.add(it)
-                }
-            }
-            return warnDanger(EntryWarning(warnLines))
-        }
-
-        fun openGuide(rawText: String?) {
-            val guide = JFrame("Guide")
-            guide.defaultCloseOperation = WindowConstants.DISPOSE_ON_CLOSE
-            guide.iconImage = getResourceImage("/skyclient.png")
-            guide.isResizable = false
-            val pane = JPanel()
-            val gridBag = GridBagLayout()
-            val constraints = GridBagConstraints()
-            guide.layout = gridBag
-            pane.layout = gridBag
-            constraints.fill = GridBagConstraints.HORIZONTAL
-            val parser = Parser.builder().build()
-            val document = parser.parse(rawText)
-            val renderer = HtmlRenderer.builder().build()
-            val html = renderer.render(document)
-            println(html)
-            val editorPane = JEditorPane()
-            val kit = HTMLEditorKit()
-            val style = StyleSheet()
-            style.importStyleSheet(MainGui::class.java.getResource("/md-style.css"))
-            kit.styleSheet = style
-            editorPane.editorKit = kit
-            //        editorPane.setContentType("text/html");
-//        editorPane.getEditorKit().
-            editorPane.isEditable = false
-            editorPane.text = html
-            pane.add(editorPane)
-            val sp = JScrollPane(
-                pane,
-                ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED
-            )
-            sp.verticalScrollBar.unitIncrement = 16
-            sp.preferredSize = Dimension(800, 600)
-            constraints.gridwidth = 0
-            constraints.gridy = constraints.gridwidth
-            constraints.gridx = constraints.gridy
-            gridBag.setConstraints(sp, constraints)
-            guide.add(sp)
-            guide.pack()
-            guide.isVisible = true
-        }
-
-        //    private List<JLabel> mdToLabels(String md) {
-        //        List<JLabel> labels = new ArrayList<>();
-        //        String textParsed =
-        //    }
         fun genPopup(actions: Array<EntryAction?>): JPopupMenu {
             val popup = JPopupMenu()
             for (action in actions) {
                 val menuItem = JMenuItem(action?.display)
                 menuItem.addMouseListener(object : MouseAdapter() {
                     override fun mouseReleased(e: MouseEvent) {
-                        action?.action?.run()
+                        Multithreading.runAsync {
+                            action?.action?.run()
+                        }
                     }
                 })
                 popup.add(menuItem)

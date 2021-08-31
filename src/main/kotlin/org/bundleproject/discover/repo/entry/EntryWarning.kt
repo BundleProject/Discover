@@ -1,7 +1,5 @@
 package org.bundleproject.discover.repo.entry
 
-import java.util.*
-
 
 class EntryWarning {
     private val message: List<String?>

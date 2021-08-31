@@ -19,7 +19,7 @@ class Discover {
     var mcDir: File? = null
     private val bundlePath: String
     val repositoryManager: RepositoryManager
-    private val mainGui: MainGui
+    val mainGui: MainGui
 
     @Throws(IOException::class)
     fun install() {
@@ -95,15 +95,19 @@ class Discover {
             if (!mod.isEnabled) continue
             Log.startSection("Downloading Mod: " + mod.displayName)
             if (!mod.downloadUrl.startsWith("https://")) {
-                Log.endSection(mod.displayName + " tried to download invalid URL: " + mod.downloadUrl)
+                Log.endSection("${mod.displayName}'s download URL (${mod.downloadUrl}) was either invalid or insecure.")
                 continue
             }
             downloadFile(mod.downloadUrl, File(modsDir, mod.fileName))
             for (requiredFileName in mod.files) {
-                val requiredFile = File(bdFile, requiredFileName)
-                requiredFile.parentFile.mkdirs()
-                Log.sendSectionInfo("Downloading Extra File: " + requiredFile.absolutePath)
-                downloadFile(RepositoryManager.MC_DIR_URL + requiredFileName, requiredFile)
+                if (!requiredFileName.isNullOrEmpty()) {
+                    val requiredFile = File(bdFile, requiredFileName)
+                    requiredFile.parentFile.mkdirs()
+                    Log.sendSectionInfo("Downloading Extra File: " + requiredFile.absolutePath)
+                    downloadFile(RepositoryManager.MC_DIR_URL + requiredFileName, requiredFile)
+                } else {
+                    println("Extra File is null, skipping.")
+                }
             }
             Log.endSection()
         }
@@ -141,7 +145,7 @@ class Discover {
         Log.info("Finished installing Bundle Discover!")
     }
 
-    val bdFile: File
+    private val bdFile: File
         get() = File(mcDir, bundlePath)
 
     companion object {

@@ -5,6 +5,7 @@ import dev.isxander.xanderlib.utils.HttpsUtils.downloadFile
 import dev.isxander.xanderlib.utils.HttpsUtils.getString
 import dev.isxander.xanderlib.utils.Multithreading.runAsync
 import dev.isxander.xanderlib.utils.json.BetterJsonObject
+import org.bundleproject.discover.Discover
 import org.bundleproject.discover.repo.entry.EntryAction
 import org.bundleproject.discover.repo.entry.EntryWarning
 import org.bundleproject.discover.repo.entry.ModEntry
@@ -81,7 +82,7 @@ class RepositoryManager {
                         text = "Guide (Built-In)"
                         action = Runnable {
                             try {
-                                Desktop.getDesktop().browse(URI(actionObj.optString("document")))
+                                Discover.instance?.mainGui?.openGuide(getString(actionObj.optString("document")))
                             } catch (e: Exception) {
                                 e.printStackTrace()
                             }
@@ -202,6 +203,10 @@ class RepositoryManager {
     }
 
     companion object {
+        /*/
+        Yes, we will obviously switch this to Bundle Assets in the future,
+        just that the API hasn't been made yet.
+         */
         const val MODS_JSON_URL = "https://raw.githubusercontent.com/nacrt/SkyblockClient-REPO/main/files/mods.json"
         const val ICONS_DIR_URL = "https://raw.githubusercontent.com/nacrt/SkyblockClient-REPO/main/files/icons/"
         const val MC_DIR_URL = "https://raw.githubusercontent.com/nacrt/SkyblockClient-REPO/main/files/mcdir/"
@@ -209,7 +214,7 @@ class RepositoryManager {
             "https://raw.githubusercontent.com/nacrt/SkyblockClient-REPO/main/files/forge/1.8.9-forge1.8.9-11.15.1.2318-1.8.9.json"
         const val FORGE_VERSION_JAR =
             "https://raw.githubusercontent.com/nacrt/SkyblockClient-REPO/main/files/forge/forge-1.8.9-11.15.1.2318-1.8.9.jar"
-        val CACHE_FOLDER = File(File(System.getProperty("user.home")), ".skyclient/")
+        val CACHE_FOLDER = File(File(System.getProperty("user.home")), ".bundle/")
         val CACHE_TIME = TimeUnit.DAYS.toMillis(1)
         val ICON_FOLDER = File(CACHE_FOLDER, "icons")
     }

@@ -6,16 +6,16 @@ object OSChecker {
     private var detectedOS: OSType? = null
     val operatingSystemType: OSType?
         get() {
-            if (detectedOS == null) {
-                val OS = System.getProperty("os.name", "generic").lowercase(Locale.getDefault())
-                if (OS.contains("mac") || OS.contains("darwin")) {
-                    detectedOS = OSType.OS_X
-                } else if (OS.contains("win")) {
-                    detectedOS = OSType.WINDOWS
-                } else if (OS.contains("nux")) {
-                    detectedOS = OSType.LINUX
+            if (detectedOS == null) { //The user's computer can't change operating systems without restarting
+                val os = System.getProperty("os.name", "generic").lowercase(Locale.getDefault())
+                detectedOS = if (os.contains("mac") || os.contains("darwin")) {
+                    OSType.OS_X
+                } else if (os.contains("win")) {
+                    OSType.WINDOWS
+                } else if (os.contains("nux")) {
+                    OSType.LINUX
                 } else {
-                    detectedOS = OSType.UNKNOWN
+                    OSType.UNKNOWN
                 }
             }
             return detectedOS

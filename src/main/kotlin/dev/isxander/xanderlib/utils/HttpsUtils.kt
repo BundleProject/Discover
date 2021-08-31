@@ -9,12 +9,12 @@ import java.io.IOException
 
 object HttpsUtils {
 
-    fun getResponse(url: String): Response? {
+    private fun getResponse(url: String): Response? {
         try {
             val client = OkHttpClient()
             val request: Request = Request.Builder()
                 .url(url)
-                .addHeader("User-Agent", "SkyClient/1.0")
+                .addHeader("User-Agent", "Discover/1.0")
                 .build()
             return client.newCall(request).execute()
         } catch (e: IOException) {
@@ -23,7 +23,7 @@ object HttpsUtils {
         return null
     }
 
-    fun getBytes(url: String): ByteArray? {
+    private fun getBytes(url: String): ByteArray? {
         try {
             return getResponse(url)!!.body!!.bytes()
         } catch (e: IOException) {
@@ -43,9 +43,14 @@ object HttpsUtils {
 
     @Throws(IOException::class)
     fun downloadFile(url: String, file: File) {
-        val fos = FileOutputStream(file)
-        fos.write(getBytes(url))
-        fos.close()
+        val bytes = getBytes(url)
+        if (bytes != null) {
+            val fos = FileOutputStream(file)
+            fos.write(bytes)
+            fos.close()
+        } else {
+            throw IOException("Bytes from URL was null!")
+        }
     }
 
 }

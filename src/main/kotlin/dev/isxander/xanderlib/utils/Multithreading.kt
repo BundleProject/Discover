@@ -11,21 +11,12 @@ object Multithreading {
     ) { r: Runnable? ->
         Thread(
             r,
-            String.format("Scheduled Thread #%s", counter.incrementAndGet())
+            "Scheduled Thread ${counter.incrementAndGet()}"
         )
     }
-    val POOL = ThreadPoolExecutor(
+    private val POOL = ThreadPoolExecutor(
         20, 20, 0L, TimeUnit.SECONDS, LinkedBlockingQueue()
     ) { r: Runnable? -> Thread(r, String.format("Thread #%s", counter.incrementAndGet())) }
-
-    fun scheduleAsyncAtFixedRate(
-        runnable: Runnable,
-        initialDelay: Long,
-        delayBetweenExecution: Long,
-        unit: TimeUnit
-    ): ScheduledFuture<*>? {
-        return SCHEDULED_POOL.scheduleAtFixedRate(runnable, initialDelay, delayBetweenExecution, unit)
-    }
 
     fun scheduleAsync(runnable: Runnable, delay: Long, unit: TimeUnit): ScheduledFuture<*>? {
         return SCHEDULED_POOL.schedule(runnable, delay, unit)
@@ -33,10 +24,6 @@ object Multithreading {
 
     fun runAsync(runnable: Runnable) {
         POOL.execute(runnable)
-    }
-
-    fun submit(runnable: Runnable): Future<*>? {
-        return POOL.submit(runnable)
     }
 
 }
