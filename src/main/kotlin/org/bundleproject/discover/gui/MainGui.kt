@@ -119,7 +119,7 @@ class MainGui(private val discover: Discover) {
         val frame = JFrame("Bundle Discover")
         frame.defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE
         frame.iconImage = icon
-        frame.isResizable = true
+        frame.isResizable = false
         val container = frame.contentPane
         val modPane = JPanel()
         val packPane = JPanel()
